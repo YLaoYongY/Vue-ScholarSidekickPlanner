@@ -1,1 +1,1 @@
-# Vue-ToDoList
+# Vue-ScholarSidekickPlanner
