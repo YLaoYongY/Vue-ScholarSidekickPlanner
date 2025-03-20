@@ -5,9 +5,6 @@
 
 <template>
   <router-view></router-view>
-  <!-- <p>{{ userStore.token }}</p>
-  <el-button @click="userStore.removeToken">删除token</el-button>
-  <el-button @click="userStore.setToken('faefafaefaaf')" type="primary">设置token</el-button> -->
 </template>
 
 <style scoped></style>
