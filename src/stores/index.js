@@ -9,4 +9,4 @@ export default pinia
 // import { useUserStore } from './user'
 // export { useUserStore }
 
-export * from './user'
+export * from './modules/user'
