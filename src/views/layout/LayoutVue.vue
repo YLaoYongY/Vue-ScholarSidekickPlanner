@@ -7,7 +7,7 @@
 
 <template>
   <div class="layout" :style="{ 'grid-template-columns': `${sidebarWidth} auto` }">
-    <slide-bar @mouseover="sidebarWidth = '20rem'" @mouseleave="sidebarWidth = '5rem'"></slide-bar>
+    <slide-bar @mouseover="sidebarWidth = '230px'" @mouseleave="sidebarWidth = '5rem'"></slide-bar>
     <router-view></router-view>
   </div>
 </template>
