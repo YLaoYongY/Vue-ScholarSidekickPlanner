@@ -21,7 +21,7 @@
               <img src="@/assets/images/xy.jpg" alt="" />
             </div>
           </div>
-          <div class="text">夏雨出品必属精品</div>
+          <div class="text danger">ToDo <span class="success">List</span></div>
         </a>
       </li>
       <li>
@@ -236,5 +236,11 @@
     transition: 0.5s;
     border: 7px solid rgb(110, 90, 240);
     box-sizing: border-box;
+  }
+  .danger {
+    color: #ff0060;
+  }
+  .success {
+    color: #1b9c85;
   }
 </style>
