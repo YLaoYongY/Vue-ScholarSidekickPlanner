@@ -112,8 +112,8 @@
   }
 
   .shell {
-    position: fixed;
-    width: 84px;
+    /* position: fixed; */
+    width: 100%;
     height: 100%;
     background: #fff;
     z-index: 9999;
@@ -123,7 +123,7 @@
   }
 
   .shell:hover {
-    width: 300px;
+    width: 230px;
   }
 
   .imageBox {
