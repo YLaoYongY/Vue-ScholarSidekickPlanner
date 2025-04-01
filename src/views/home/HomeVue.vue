@@ -10,7 +10,14 @@
               <h3>昨日任务进度</h3>
               <p class="percentage">75%</p>
             </div>
-            <div class="chart-section" ref="chart1"></div>
+            <div class="chart-section" ref="chart1">
+              <el-progress type="dashboard" :percentage="75">
+                <template #default="{ percentage }">
+                  <span class="percentage-value">{{ percentage }}%</span>
+                  <span class="percentage-label">今日任务进度</span>
+                </template>
+              </el-progress>
+            </div>
           </div>
         </li>
         <li class="chart-card">
@@ -19,7 +26,14 @@
               <h3>今日任务进度</h3>
               <p class="percentage">75%</p>
             </div>
-            <div class="chart-section" ref="chart1"></div>
+            <div class="chart-section" ref="chart1">
+              <el-progress type="dashboard" :percentage="75">
+                <template #default="{ percentage }">
+                  <span class="percentage-value">{{ percentage }}%</span>
+                  <span class="percentage-label">今日任务进度</span>
+                </template>
+              </el-progress>
+            </div>
           </div>
         </li>
         <li class="chart-card">
@@ -28,7 +42,14 @@
               <h3>总目标进度</h3>
               <p class="percentage">75%</p>
             </div>
-            <div class="chart-section" ref="chart1"></div>
+            <div class="chart-section" ref="chart1">
+              <el-progress type="dashboard" :percentage="75">
+                <template #default="{ percentage }">
+                  <span class="percentage-value">{{ percentage }}%</span>
+                  <span class="percentage-label">今日任务进度</span>
+                </template>
+              </el-progress>
+            </div>
           </div>
         </li>
       </ul>
@@ -146,5 +167,23 @@
       flex: 1 1 48%;
       max-width: calc(50% - 10px);
     }
+  }
+  /* 圆形进度条样式 */
+  .percentage-value {
+    display: block;
+    margin-top: 10px;
+    font-size: 28px;
+  }
+  .percentage-label {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .demo-progress .el-progress--line {
+    margin-bottom: 15px;
+    width: 350px;
+  }
+  .demo-progress .el-progress--circle {
+    margin-right: 15px;
   }
 </style>
