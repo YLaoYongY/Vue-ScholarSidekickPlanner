@@ -6,7 +6,7 @@
   const flipInterval = ref(null)
   const restoreTimer = ref(null)
   const isHovered = ref(false)
-  const timer = ref(null)
+
   const isFlipped = ref(false)
 
   const updateTime = () => {
@@ -26,17 +26,15 @@
     flipInterval.value = null
     restoreTimer.value = null
   }
-
+  let timer
   const startInterval = () => {
-    let timer
-
     const flipWithRestore = () => {
       if (!isHovered.value) {
         flipCard()
         timer = setTimeout(() => {
           if (!isHovered.value) flipCard()
           timer = setTimeout(flipWithRestore, 5000)
-        }, 5000)
+        }, 9999999000)
       }
     }
 
@@ -132,7 +130,63 @@
               <div class="time">{{ currentTime }}</div>
               <div class="date">{{ currentDate }}</div>
             </div>
-            <div class="flip-content">这里是翻转后的内容</div>
+            <div class="flip-content">
+              <div class="left-flip">
+                <span>距离</span>
+                <h2>春节</h2>
+                <div class="holiday-time">322天</div>
+                <div class="date">{{ currentDate }}</div>
+              </div>
+              <div class="right-border"></div>
+              <div class="right-flip">
+                <ul class="time-progress-bar">
+                  <li>
+                    今日
+                    <el-progress
+                      style="width: 150px; margin-left: 5px"
+                      :percentage="90"
+                      :stroke-width="20"
+                      :text-inside="true"
+                      striped
+                      striped-flow
+                    />
+                  </li>
+                  <li>
+                    本周
+                    <el-progress
+                      style="width: 150px; margin-left: 5px"
+                      :percentage="90"
+                      :stroke-width="20"
+                      :text-inside="true"
+                      striped
+                      striped-flow
+                    />
+                  </li>
+                  <li>
+                    本月
+                    <el-progress
+                      style="width: 150px; margin-left: 5px"
+                      :percentage="90"
+                      :stroke-width="20"
+                      :text-inside="true"
+                      striped
+                      striped-flow
+                    />
+                  </li>
+                  <li>
+                    本年
+                    <el-progress
+                      style="width: 150px; margin-left: 5px"
+                      :percentage="90"
+                      :stroke-width="20"
+                      :text-inside="true"
+                      striped
+                      striped-flow
+                    />
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </li>
         <li class="status-card">
@@ -147,6 +201,11 @@
 </template>
 
 <style scoped>
+  * {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
   .home {
     display: flex;
     height: 100vh; /* 确保容器高度 */
@@ -182,6 +241,7 @@
     list-style: none;
     margin: 0;
     padding: 0;
+    height: 100%;
   }
   .status-card {
     flex: 1 1 30%; /* 基础30%宽度 */
@@ -191,7 +251,7 @@
     border-radius: 30px;
     box-shadow: 0 2rem 3rem rgba(132, 139, 200, 0.18);
     padding: 15px; /* 减小内边距 */
-    height: 160px; /* 适当降低高度 */
+    height: 30%; /* 适当降低高度 */
     transition: all 0.3s; /* 添加过渡效果 */
     margin: auto;
     position: relative;
@@ -216,7 +276,7 @@
     height: 100%;
     backface-visibility: hidden;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     padding: 15px;
@@ -224,6 +284,7 @@
     border-radius: 20px;
   }
   .time-section {
+    flex-direction: column;
     background: #409eff;
     color: white;
   }
@@ -232,6 +293,7 @@
     background: #ff7d00;
     color: white;
     transform: rotateY(180deg);
+    /* width: 100%; */
   }
   .flip-title {
     font-size: 18px;
@@ -250,6 +312,45 @@
 
   .date {
     font-size: 16px;
+  }
+  .flip-content {
+  }
+  .left-flip,
+  .right-flip {
+    display: flex;
+    flex: 1 1 40%;
+    height: 100%;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .left-flip {
+  }
+  .holiday-time {
+    font: bold 3rem Arial, sans-serif;
+    color: #409eff;
+  }
+  h2 {
+    margin: 0;
+  }
+  .right-flip {
+    flex: 1 1 60%;
+    position: relative;
+  }
+  .right-border {
+    width: 2px; /* 边框宽度 */
+    height: 150px; /* 边框长度，根据需要调整 */
+    background-color: #e3e8f7; /* 边框颜色 */
+  }
+  .time-progress-bar li {
+    display: flex;
+    width: 190px;
+    float: right;
+    margin-bottom: 1em;
+    /* white-space: nowrap; */
+  }
+  .demo-progress .el-progress--line {
+    margin-bottom: 15px;
+    width: 350px;
   }
   .header {
     margin: 0;
