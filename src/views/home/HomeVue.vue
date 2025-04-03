@@ -105,13 +105,14 @@
           return p.data[0] + ': ' + p.data[1]
         },
       },
+      // 右侧颜色条配置
       visualMap: {
         min: 0,
         max: 1000,
         calculable: true,
         orient: 'vertical',
         right: '5%',
-        top: '15%',
+        top: '20%',
         // left: '80%', // 改为百分比定位
         // top: '10%', // 垂直居中
         itemWidth: 20, // 颜色条宽度
@@ -121,10 +122,12 @@
           color: '#666',
         },
       },
+      // 图表标题
       title: {
         show: true,
         text: '热力图', // 标题文本
         left: 'center',
+        top: '10%',
         padding: [10, 0], // 上下边距
         textStyle: {
           color: '#333',
@@ -132,7 +135,7 @@
         },
       },
       calendar: {
-        top: '20%',
+        top: '30%',
         left: '10%',
         right: '25%',
         // width: '300em',
@@ -177,8 +180,25 @@
     clearAllTimers()
   })
 
-  // 热力图
-  // import * as echarts from 'echarts/core'
+  // 轮播图数据
+  const item = [
+    '/src/assets/images/1.png',
+    '/src/assets/images/2.png',
+    '/src/assets/images/3.jpeg',
+    '/src/assets/images/4.JPG',
+  ]
+  // 座右铭数据
+  const maxims = ref([
+    { text: '他日我若为青帝，报与桃李一处开。', author: '黄巢' },
+    { text: '路漫漫其修远兮，吾将上下而求索。', author: '屈原' },
+    { text: '天行健，君子以自强不息。', author: '《周易》' },
+    { text: '博观而约取，厚积而薄发。', author: '苏轼' },
+  ])
+  const currentMaximIndex = ref(0)
+
+  const nextMaxim = () => {
+    currentMaximIndex.value = (currentMaximIndex.value + 1) % maxims.value.length
+  }
 </script>
 <template>
   <div class="home">
@@ -238,7 +258,7 @@
     <div class="right-content">
       <h2 class="header" style="border: 1px solid black">右侧顶部栏</h2>
       <ul class="status-bar">
-        <li class="status-card" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
+        <li class="status-card" style="height: 15rem" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
           <div class="card-content" :style="{ transform: isFlipped ? 'rotateY(180deg)' : '' }">
             <div class="time-section">
               <div class="time">{{ currentTime }}</div>
@@ -305,10 +325,21 @@
         </li>
         <li class="status-card">
           <div id="main" style="width: 100%; height: 100%"></div>
-          <!-- <div class="card-content"></div> -->
         </li>
         <li class="status-card">
-          <div class="card-content"></div>
+          <div class="top-img">
+            <el-carousel :interval="5000" arrow="always">
+              <el-carousel-item v-for="item in item" :key="item">
+                <img :src="item" alt="" />
+              </el-carousel-item>
+            </el-carousel>
+            <div class="maxim" @click="nextMaxim">
+              <h2 class="maxim-text" style="font-weight: 200; margin: 10px 0">
+                {{ maxims[currentMaximIndex].text }}
+              </h2>
+              <h3 class="author" style="font-weight: 200">——{{ maxims[currentMaximIndex].author }}</h3>
+            </div>
+          </div>
         </li>
       </ul>
     </div>
@@ -348,13 +379,14 @@
     /* 改为相对单位 */
     min-width: 250px;
     max-width: 25%;
-    background: #e8e8e8;
+    /* background: #e8e8e8; */
     height: 100%;
   }
   /* 右侧卡片的样式 */
   .status-bar {
     list-style: none;
     margin: 0;
+
     padding: 0;
     height: 100%;
   }
@@ -365,14 +397,13 @@
     box-sizing: border-box;
     border-radius: 30px;
     box-shadow: 0 2rem 3rem rgba(132, 139, 200, 0.18);
-    padding: 15px; /* 减小内边距 */
+    /* padding: 15px; 减小内边距 */
     height: 30%; /* 适当降低高度 */
     transition: all 0.3s; /* 添加过渡效果 */
     margin: auto;
+    margin-bottom: 1rem;
     position: relative;
     perspective: 1000px;
-    /* background: #409eff; */
-    color: white;
   }
   .status-card .card-content {
     position: relative;
@@ -456,13 +487,22 @@
     height: 150px; /* 边框长度，根据需要调整 */
     background-color: #e3e8f7; /* 边框颜色 */
   }
+  .time-progress-bar {
+    display: flex; /* 使用flex布局 */
+    flex-direction: column;
+    justify-content: center; /* 水平居中 */
+    padding: 0; /* 移除任何上内边距 */
+    margin: 0; /* 移除外边距 */
+  }
   .time-progress-bar li {
     display: flex;
     width: 190px;
     float: right;
+    margin: auto;
     margin-bottom: 1em;
     /* white-space: nowrap; */
   }
+
   .demo-progress .el-progress--line {
     margin-bottom: 15px;
     width: 350px;
@@ -563,5 +603,39 @@
   }
   .demo-progress .el-progress--circle {
     margin-right: 15px;
+  }
+  /* 轮播图样式 */
+  .top-img {
+    /* flex: 1, 1, 50%; */
+    height: 60%;
+  }
+  .el-carousel {
+    height: 100%;
+  }
+  .el-carousel__item {
+    height: 100%;
+  }
+  .el-carousel__item img {
+    width: 100%;
+    height: 60%;
+    border-radius: 30px 30px 0 0;
+  }
+  /* 座右铭样式 */
+  .maxim {
+    width: 100%;
+    height: 60%;
+    padding: 10px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: transform 0.2s;
+    user-select: none; /* 新增 */
+    /* background-color: #2128f7; */
+  }
+  .maxim:active {
+    transform: scale(0.98);
+  }
+  /* 名人名言 */
+  .author {
+    float: right;
   }
 </style>
