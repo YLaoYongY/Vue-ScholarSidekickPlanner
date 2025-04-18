@@ -39,7 +39,7 @@
 <template>
   <li class="status-card" style="min-height: 300px">
     <div class="top-img">
-      <el-carousel ref="carouselRef" :interval="1000" arrow="always" @change="handleCarouselChange">
+      <el-carousel ref="carouselRef" :interval="5000" arrow="always" @change="handleCarouselChange">
         <el-carousel-item v-for="item in item" :key="item">
           <img :src="item" alt="" />
         </el-carousel-item>
