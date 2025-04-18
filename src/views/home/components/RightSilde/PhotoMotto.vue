@@ -14,17 +14,32 @@
     { text: '路漫漫其修远兮，吾将上下而求索。', author: '屈原' },
     { text: '天行健，君子以自强不息。', author: '《周易》' },
     { text: '博观而约取，厚积而薄发。', author: '苏轼' },
+    { text: '真理只掌握在少数人手里', author: '苏轼' },
+    { text: '知之者不如好之者，好之者不如乐之者。', author: '孔子' },
+    { text: '学而不思则罔，思而不学则殆。', author: '老子' },
+    { text: '读书破万卷，下笔如有神。', author: '苏轼' },
   ])
   const currentMaximIndex = ref(0)
 
-  const nextMaxim = () => {
+  // 分离两个索引状态
+
+  const carouselRef = ref(null)
+
+  // 轮播图切换时触发座右铭更新
+  const handleCarouselChange = () => {
     currentMaximIndex.value = (currentMaximIndex.value + 1) % maxims.value.length
+  }
+
+  // 点击座右铭时触发轮播图切换
+  const nextMaxim = () => {
+    const nextIndex = (carouselRef.value.activeIndex + 1) % item.length
+    carouselRef.value.setActiveItem(nextIndex)
   }
 </script>
 <template>
   <li class="status-card" style="min-height: 300px">
     <div class="top-img">
-      <el-carousel :interval="5000" arrow="always">
+      <el-carousel ref="carouselRef" :interval="1000" arrow="always" @change="handleCarouselChange">
         <el-carousel-item v-for="item in item" :key="item">
           <img :src="item" alt="" />
         </el-carousel-item>
