@@ -22,22 +22,26 @@
       const now = new Date() // 获取当前日期
       const year = now.getFullYear()
       const month = now.getMonth() // 注意月份是0-based
-      const heatData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      const heatData = [
+        500, 300, 900, 138, 299, 366, 456, 654, 321, 123, 956, 432, 600, 100, 300, 100, 300, 400, 500, 600, 700, 800,
+        400, 500, 600, 700, 800, 900, 100, 200,
+      ]
       // 计算当月第一天和最后一天
       const firstDay = new Date(year, month, 1)
       const lastDay = new Date(year, month + 1, 0) // 下个月的第0天即本月最后一天
 
       const data = []
       const currentDay = new Date(firstDay) // 克隆日期对象避免污染
-
+      let index = -1
       while (currentDay <= lastDay) {
         // 格式化为YYYY-MM-DD
         const dayStr = `${currentDay.getFullYear()}-${String(currentDay.getMonth() + 1).padStart(2, '0')}-${String(
           currentDay.getDate()
         ).padStart(2, '0')}`
-
-        // 这里保留随机数示例，实际可替换为真实数据
-        data.push([dayStr, Math.floor(Math.random() * 1000)])
+        console.log(dayStr)
+        index++
+        // 这里保留随机数示例，实际可替换为真实数据 只需要把Math.floor(Math.random() * 1000)替换成真实数据即可
+        data.push([dayStr, heatData[index]])
 
         // 增加一天
         currentDay.setDate(currentDay.getDate() + 1)
