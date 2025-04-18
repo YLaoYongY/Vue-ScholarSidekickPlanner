@@ -1,17 +1,14 @@
 <script setup>
   import RightHeader from './RightHeader.vue'
-  import TimeCard from './TimeCard.vue'
+
   components: {
     RightHeader
   }
-  import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+  import { onMounted } from 'vue'
   import * as echarts from 'echarts'
   import { TitleComponent, CalendarComponent, TooltipComponent, VisualMapComponent } from 'echarts/components'
   import { HeatmapChart } from 'echarts/charts'
   import { CanvasRenderer } from 'echarts/renderers'
-  import HeatMap from './HeatMap.vue'
-  import draggable from 'vuedraggable'
-  import { Rank, Plus } from '@element-plus/icons-vue'
 
   onMounted(() => {
     echarts.use([TitleComponent, CalendarComponent, TooltipComponent, VisualMapComponent, HeatmapChart, CanvasRenderer])
@@ -25,7 +22,7 @@
       const now = new Date() // 获取当前日期
       const year = now.getFullYear()
       const month = now.getMonth() // 注意月份是0-based
-
+      const heatData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
       // 计算当月第一天和最后一天
       const firstDay = new Date(year, month, 1)
       const lastDay = new Date(year, month + 1, 0) // 下个月的第0天即本月最后一天
@@ -71,6 +68,10 @@
         textStyle: {
           color: '#666',
         },
+        // 颜色条和图表单元格的颜色
+        inRange: {
+          color: ['#50a3ba', '#eac736', '#d9534f'], // 从蓝色到黄色再到红色
+        },
       },
       // 图表标题
       title: {
@@ -92,6 +93,7 @@
         // height: '200em',
         orient: 'vertical',
         cellSize: [35, 35],
+
         range: `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`,
         dayLabel: {
           position: 'start',
@@ -125,26 +127,6 @@
 
     option && myChart.setOption(option)
   })
-
-  // 轮播图数据
-  const item = [
-    '/src/assets/images/1.png',
-    '/src/assets/images/2.png',
-    '/src/assets/images/3.jpeg',
-    '/src/assets/images/4.JPG',
-  ]
-  // 座右铭数据
-  const maxims = ref([
-    { text: '他日我若为青帝，报与桃李一处开。', author: '黄巢' },
-    { text: '路漫漫其修远兮，吾将上下而求索。', author: '屈原' },
-    { text: '天行健，君子以自强不息。', author: '《周易》' },
-    { text: '博观而约取，厚积而薄发。', author: '苏轼' },
-  ])
-  const currentMaximIndex = ref(0)
-
-  const nextMaxim = () => {
-    currentMaximIndex.value = (currentMaximIndex.value + 1) % maxims.value.length
-  }
 </script>
 
 <template>

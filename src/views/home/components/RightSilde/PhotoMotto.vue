@@ -1,12 +1,5 @@
 <script setup>
-  import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-  import * as echarts from 'echarts'
-  import { TitleComponent, CalendarComponent, TooltipComponent, VisualMapComponent } from 'echarts/components'
-
-  import { CanvasRenderer } from 'echarts/renderers'
-
-  import draggable from 'vuedraggable'
-  import { Rank, Plus } from '@element-plus/icons-vue'
+  import { ref } from 'vue'
 
   // 轮播图数据
   const item = [
