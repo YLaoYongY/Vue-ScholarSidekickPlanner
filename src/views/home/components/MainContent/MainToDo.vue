@@ -1,5 +1,10 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+
+  import draggable from 'vuedraggable'
+
+  import { useTaskStore } from '@/stores/modules/todolist'
+  const taskStore = useTaskStore()
   // 四象限数据
   const quadrants = ref([
     { class: 'important-urgent', label: '重要且紧急', type: 'important-urgent' },
@@ -23,7 +28,7 @@
   ])
 
   // 任务相关数据
-  const tasks = ref([])
+  const tasks = ref(taskStore.tasks || [])
   const taskModalVisible = ref(false)
   const currentQuadrant = ref('')
   const isCustomTask = ref(false)
@@ -79,12 +84,13 @@
       endTime: newTask.value.endTime,
       priority: priority,
     })
-
+    taskStore.addTask(tasks.value)
     taskModalVisible.value = false
   }
 
   const onDragEnd = () => {
     // 可以在这里保存排序后的任务顺序
+    // taskStore.updateTaskOrder(taskStore.tasks)
     console.log('任务顺序已更新', tasks.value)
   }
 
