@@ -84,7 +84,7 @@
       endTime: newTask.value.endTime,
       priority: priority,
     })
-    taskStore.addTask(tasks.value)
+    taskStore.addTask(newTask.value)
     taskModalVisible.value = false
   }
 
@@ -367,16 +367,25 @@
   }
 
   .task-info {
+    display: flex;
+    flex-direction: row;
+    text-indent: 2em;
     flex: 1;
   }
 
   .task-name {
+    font-size: 2em;
+    line-height: 2em;
+
     font-weight: bold;
-    margin-bottom: 5px;
   }
 
   .task-time {
-    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-left: auto;
+    font-size: 1.2em;
     color: #666;
   }
 
