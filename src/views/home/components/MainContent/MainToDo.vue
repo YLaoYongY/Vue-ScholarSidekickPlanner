@@ -77,7 +77,16 @@
       taskType: 'short', // 强制重置为短时任务
     }
   }
-
+  // 添加日期范围变化处理
+  const handleDateRangeChange = dates => {
+    if (dates && dates.length === 2) {
+      newTask.value.startTime = dates[0] + ' 00:00:00'
+      newTask.value.endTime = dates[1] + ' 23:59:59'
+    } else {
+      newTask.value.startTime = ''
+      newTask.value.endTime = ''
+    }
+  }
   // 修改addTask方法
   const addTask = () => {
     if (!newTask.value.name) {
@@ -137,16 +146,6 @@
       }
     }
 
-    // 添加日期范围变化处理
-    const handleDateRangeChange = dates => {
-      if (dates && dates.length === 2) {
-        newTask.value.startTime = dates[0] + ' 00:00:00'
-        newTask.value.endTime = dates[1] + ' 23:59:59'
-      } else {
-        newTask.value.startTime = ''
-        newTask.value.endTime = ''
-      }
-    }
     tasks.value = [...tasks.value, ...generatedTasks] // 单次批量添加
     generatedTasks.forEach(task => taskStore.addTask(task)) // 同步到store
 
