@@ -35,11 +35,18 @@
 
   const newTask = ref({
     name: '',
+    taskType: 'short', // 'short'或'long'
     startTime: '',
     endTime: '',
+    duration: 0.5, // 默认半小时
     priority: '',
+    dateRange: [],
   })
-
+  // 添加任务类型选项
+  const taskTypeOptions = ref([
+    { label: '短时任务', value: 'short' },
+    { label: '长期任务', value: 'long' },
+  ])
   // 计算属性
   const currentQuadrantLabel = computed(() => {
     const quadrant = quadrants.value.find(q => q.type === currentQuadrant.value)
@@ -67,24 +74,84 @@
       startTime: '',
       endTime: '',
       priority: isCustomTask.value ? '' : currentQuadrant.value,
+      taskType: 'short', // 强制重置为短时任务
     }
   }
 
+  // 修改addTask方法
   const addTask = () => {
     if (!newTask.value.name) {
+      ElMessage.error('请输入任务名称')
       return
     }
 
-    const newTaskData = {
-      name: newTask.value.name,
-      startTime: newTask.value.startTime,
-      endTime: newTask.value.endTime,
-      priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
+    // 生成任务列表
+    const generatedTasks = []
+
+    if (newTask.value.taskType === 'short') {
+      if (!newTask.value.startTime || !newTask.value.endTime) {
+        ElMessage.error('请选择完整时间范围')
+        return
+      }
+
+      if (newTask.value.endTime < newTask.value.startTime) {
+        ElMessage.error('结束时间不能早于开始时间')
+        return
+      }
+
+      const today = new Date().toISOString().split('T')[0]
+
+      generatedTasks.push({
+        id: Date.now(), // 使用统一时间戳
+        name: newTask.value.name,
+        startTime: new Date(`${today}T${newTask.value.startTime}:00`),
+        endTime: new Date(`${today}T${newTask.value.endTime}:00`),
+        priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
+      })
+    } else {
+      // 长期任务处理
+      if (!newTask.value.startTime || !newTask.value.endTime) {
+        ElMessage.error('请选择完整日期范围')
+        return
+      }
+
+      const startDate = new Date(newTask.value.startTime)
+      const endDate = new Date(newTask.value.endTime)
+      endDate.setHours(23, 59, 59) // 包含结束日期的全天
+
+      // 生成每日任务
+      for (let day = new Date(startDate); day <= endDate; day.setDate(day.getDate() + 1)) {
+        const taskDate = new Date(day)
+        generatedTasks.push({
+          name: newTask.value.name,
+          startTime: new Date(taskDate.setHours(9, 0)), // 默认9点开始
+          endTime: new Date(taskDate.setHours(9 + (newTask.value.duration * 60) / 60, 0)),
+          priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
+        })
+      }
+
+      const exists = tasks.value.some(t => t.name === newTask.value.name && t.startTime === generatedTasks[0].startTime)
+      if (exists) {
+        ElMessage.warning('相同任务已存在')
+        return
+      }
     }
-    taskStore.addTask(newTask.value)
+
+    // 添加日期范围变化处理
+    const handleDateRangeChange = dates => {
+      if (dates && dates.length === 2) {
+        newTask.value.startTime = dates[0] + ' 00:00:00'
+        newTask.value.endTime = dates[1] + ' 23:59:59'
+      } else {
+        newTask.value.startTime = ''
+        newTask.value.endTime = ''
+      }
+    }
+    tasks.value = [...tasks.value, ...generatedTasks] // 单次批量添加
+    generatedTasks.forEach(task => taskStore.addTask(task)) // 同步到store
+
     taskModalVisible.value = false
   }
-
   const onDragEnd = () => {
     // 可以在这里保存排序后的任务顺序
     // taskStore.updateTaskOrder(taskStore.tasks)
@@ -93,7 +160,23 @@
 
   const formatTime = time => {
     if (!time) return '未设置'
-    return new Date(time).toLocaleString()
+
+    // 处理纯时间字符串 (HH:mm)
+    if (typeof time === 'string' && time.match(/^\d{2}:\d{2}$/)) {
+      const [hours, minutes] = time.split(':')
+      const date = new Date()
+      date.setHours(hours)
+      date.setMinutes(minutes)
+      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    }
+
+    return new Date(time).toLocaleString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 </script>
 <template>
@@ -155,24 +238,67 @@
       </draggable>
     </div>
 
-    <!-- 任务模态框 -->
     <el-dialog v-model="taskModalVisible" :title="`添加${currentQuadrantLabel}任务`">
-      <el-form :model="newTask" label-width="80px">
+      <el-form :model="newTask" label-width="100px">
         <el-form-item label="任务名称">
-          <el-input v-model="newTask.name" placeholder="请输入任务名称"></el-input>
+          <el-input v-model="newTask.name" placeholder="请输入任务名称" />
         </el-form-item>
-        <el-form-item label="开始时间">
-          <el-date-picker v-model="newTask.startTime" type="datetime" placeholder="选择开始时间" />
+
+        <el-form-item label="任务类型">
+          <el-radio-group v-model="newTask.taskType">
+            <el-radio v-for="item in taskTypeOptions" :key="item.value" :label="item.value">
+              {{ item.label }}
+            </el-radio>
+          </el-radio-group>
         </el-form-item>
-        <el-form-item label="结束时间">
-          <el-date-picker v-model="newTask.endTime" type="datetime" placeholder="选择结束时间" />
-        </el-form-item>
+
+        <template v-if="newTask.taskType === 'short'">
+          <el-form-item label="开始时间">
+            <el-time-picker
+              v-model="newTask.startTime"
+              placeholder="选择开始时间"
+              format="HH:mm"
+              value-format="HH:mm"
+              @change="val => (newTask.startTime = val)"
+            />
+          </el-form-item>
+          <el-form-item label="结束时间">
+            <el-time-picker
+              v-model="newTask.endTime"
+              placeholder="选择结束时间"
+              format="HH:mm"
+              value-format="HH:mm"
+              :disabled="!newTask.startTime"
+              @change="val => (newTask.endTime = val)"
+            />
+          </el-form-item>
+        </template>
+
+        <template v-else>
+          <el-form-item label="日期范围">
+            <el-date-picker
+              v-model="newTask.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              @change="handleDateRangeChange"
+            />
+          </el-form-item>
+          <el-form-item label="所需时间">
+            <el-input-number v-model="newTask.duration" :min="0.5" :max="8" :step="0.5" label="小时" />
+            <span class="ml-2">小时</span>
+          </el-form-item>
+        </template>
+
         <el-form-item label="优先级" v-if="isCustomTask">
           <el-select v-model="newTask.priority" placeholder="请选择优先级">
             <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
       </el-form>
+
       <template #footer>
         <el-button @click="taskModalVisible = false">取消</el-button>
         <el-button type="primary" @click="addTask">确定</el-button>
@@ -182,6 +308,18 @@
 </template>
 
 <style scoped>
+  /* 模态框样式 */
+  .el-date-editor.el-input {
+    width: 100%;
+  }
+
+  .el-input-number {
+    margin-right: 10px;
+  }
+
+  .ml-2 {
+    margin-left: 8px;
+  }
   /* 主页待办 */
   .main-todo {
     display: flex;
