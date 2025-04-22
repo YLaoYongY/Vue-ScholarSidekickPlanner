@@ -75,15 +75,12 @@
       return
     }
 
-    const priority = isCustomTask.value ? newTask.value.priority : currentQuadrant.value
-
-    tasks.value.push({
-      id: Date.now(),
+    const newTaskData = {
       name: newTask.value.name,
       startTime: newTask.value.startTime,
       endTime: newTask.value.endTime,
-      priority: priority,
-    })
+      priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
+    }
     taskStore.addTask(newTask.value)
     taskModalVisible.value = false
   }
@@ -390,6 +387,7 @@
   }
 
   .drag-handle {
+    width: 50px;
     cursor: move;
     color: #999;
     padding: 5px;
