@@ -186,8 +186,9 @@
   .main-todo {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh; /* 确保父容器占满视口 */
     margin-top: 10px;
+    overflow: hidden; /* 防止整体页面滚动 */
   }
 
   .quadrant-selector {
@@ -328,7 +329,9 @@
 
   .task-list {
     flex: 1;
-    overflow-y: auto;
+    min-height: 0; /* 关键属性：允许flex容器收缩 */
+    overflow-y: auto; /* 垂直滚动 */
+    padding-right: 8px; /* 防止滚动条遮挡内容 */
   }
 
   .empty-tasks {
@@ -412,5 +415,10 @@
 
   .priority-not-important-not-urgent {
     border-left: 4px solid #2196f3;
+  }
+
+  /* 脱拽样式 */
+  draggable {
+    min-height: min-content;
   }
 </style>
