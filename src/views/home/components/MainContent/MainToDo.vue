@@ -157,18 +157,22 @@
     console.log('任务顺序已更新', tasks.value)
   }
 
-  const formatTime = time => {
+  const formatTime = (time, isShortTask = false) => {
     if (!time) return '未设置'
 
-    // 处理纯时间字符串 (HH:mm)
-    if (typeof time === 'string' && time.match(/^\d{2}:\d{2}$/)) {
-      const [hours, minutes] = time.split(':')
-      const date = new Date()
-      date.setHours(hours)
-      date.setMinutes(minutes)
-      return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+    // 如果是短时任务，直接返回时分格式
+    if (isShortTask) {
+      if (typeof time === 'string' && time.match(/^\d{2}:\d{2}$/)) {
+        return time
+      }
+      const date = new Date(time)
+      return date.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
     }
 
+    // 长期任务保持完整日期时间格式
     return new Date(time).toLocaleString('zh-CN', {
       year: 'numeric',
       month: '2-digit',
@@ -225,8 +229,7 @@
             <div class="task-info">
               <div class="task-name">{{ element.name }}</div>
               <div class="task-time">
-                <div>开始: {{ formatTime(element.startTime) }}</div>
-                <div>结束: {{ formatTime(element.endTime) }}</div>
+                <div>{{ formatTime(element.startTime, true) }} - {{ formatTime(element.endTime, true) }}</div>
               </div>
             </div>
             <div class="drag-handle">
