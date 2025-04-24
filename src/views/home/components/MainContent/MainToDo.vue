@@ -1,6 +1,6 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
-
+  import { Rank, Plus, CaretTop, CaretBottom } from '@element-plus/icons-vue'
   import draggable from 'vuedraggable'
 
   import { useTaskStore } from '@/stores/modules/todolist'
@@ -228,15 +228,27 @@
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    return tasks.value.filter(task => {
-      if (task.taskType === 'long') {
-        const taskDate = new Date(task.date)
-        taskDate.setHours(0, 0, 0, 0)
-        // 严格匹配当天日期，忽略时间部分
-        return taskDate.getTime() === today.getTime()
-      }
-      return true // 短时任务始终显示
-    })
+    // 定义优先级顺序
+    const priorityOrder = [
+      'important-urgent',
+      'urgent-not-important',
+      'important-not-urgent',
+      'not-important-not-urgent',
+    ]
+
+    return tasks.value
+      .filter(task => {
+        if (task.taskType === 'long') {
+          const taskDate = new Date(task.date)
+          taskDate.setHours(0, 0, 0, 0)
+          return taskDate.getTime() === today.getTime()
+        }
+        return true
+      })
+      .sort((a, b) => {
+        // 根据预定义顺序排序
+        return priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority)
+      })
   })
   const formatTime = (
     time,
@@ -738,6 +750,10 @@
     cursor: move;
     color: #999;
     padding: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
   }
 
   .drag-handle:hover {
