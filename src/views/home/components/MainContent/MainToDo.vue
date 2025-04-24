@@ -32,13 +32,13 @@
   const taskModalVisible = ref(false)
   const currentQuadrant = ref('')
   const isCustomTask = ref(false)
-
   const newTask = ref({
     name: '',
-    taskType: 'short', // 'short'或'long'
+    taskType: 'short',
+    scheduleType: 'scheduled', // 新增任务模式字段
     startTime: '',
     endTime: '',
-    duration: 0.5, // 默认半小时
+    duration: 0.5,
     priority: '',
     dateRange: [],
   })
@@ -73,8 +73,10 @@
       name: '',
       startTime: '',
       endTime: '',
+      duration: 0.5,
       priority: isCustomTask.value ? '' : currentQuadrant.value,
-      taskType: 'short', // 强制重置为短时任务
+      taskType: 'short',
+      scheduleType: 'scheduled', // 重置为定时模式
     }
   }
   // 添加日期范围变化处理
@@ -94,27 +96,35 @@
       return
     }
 
-    // 生成任务列表
     const generatedTasks = []
 
     if (newTask.value.taskType === 'short') {
-      if (!newTask.value.startTime || !newTask.value.endTime) {
-        ElMessage.error('请选择完整时间范围')
-        return
-      }
-
-      if (newTask.value.endTime < newTask.value.startTime) {
-        ElMessage.error('结束时间不能早于开始时间')
-        return
+      // 根据任务模式进行验证
+      if (newTask.value.scheduleType === 'scheduled') {
+        if (!newTask.value.startTime || !newTask.value.endTime) {
+          ElMessage.error('请选择完整时间范围')
+          return
+        }
+        if (newTask.value.endTime < newTask.value.startTime) {
+          ElMessage.error('结束时间不能早于开始时间')
+          return
+        }
+      } else {
+        if (!newTask.value.duration) {
+          ElMessage.error('请输入所需时间')
+          return
+        }
       }
 
       const today = new Date().toISOString().split('T')[0]
-
       generatedTasks.push({
-        id: Date.now(), // 使用统一时间戳
+        id: Date.now(),
         name: newTask.value.name,
-        startTime: new Date(`${today}T${newTask.value.startTime}:00`),
-        endTime: new Date(`${today}T${newTask.value.endTime}:00`),
+        startTime:
+          newTask.value.scheduleType === 'scheduled' ? new Date(`${today}T${newTask.value.startTime}:00`) : null,
+        endTime: newTask.value.scheduleType === 'scheduled' ? new Date(`${today}T${newTask.value.endTime}:00`) : null,
+        duration: newTask.value.duration,
+        scheduleType: newTask.value.scheduleType,
         priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
       })
     } else {
@@ -157,7 +167,10 @@
     console.log('任务顺序已更新', tasks.value)
   }
 
-  const formatTime = (time, isShortTask = false) => {
+  const formatTime = (time, isShortTask = false, scheduleType = 'scheduled', duration = 0) => {
+    if (!time && scheduleType === 'unscheduled') {
+      return `${duration}小时`
+    }
     if (!time) return '未设置'
 
     // 如果是短时任务，直接返回时分格式
@@ -229,7 +242,12 @@
             <div class="task-info">
               <div class="task-name">{{ element.name }}</div>
               <div class="task-time">
-                <div>{{ formatTime(element.startTime, true) }} - {{ formatTime(element.endTime, true) }}</div>
+                <div v-if="element.scheduleType === 'scheduled'">
+                  {{ formatTime(element.startTime, true) }} - {{ formatTime(element.endTime, true) }}
+                </div>
+                <div v-else>
+                  {{ formatTime(null, true, 'unscheduled', element.duration) }}
+                </div>
               </div>
             </div>
             <div class="drag-handle">
@@ -255,45 +273,70 @@
         </el-form-item>
 
         <template v-if="newTask.taskType === 'short'">
-          <el-form-item label="开始时间">
-            <el-time-picker
-              v-model="newTask.startTime"
-              placeholder="选择开始时间"
-              format="HH:mm"
-              value-format="HH:mm"
-              @change="val => (newTask.startTime = val)"
-            />
+          <el-form-item label="任务模式">
+            <el-radio-group v-model="newTask.scheduleType">
+              <el-radio label="scheduled">定时任务</el-radio>
+              <el-radio label="unscheduled">不定时任务</el-radio>
+            </el-radio-group>
           </el-form-item>
-          <el-form-item label="结束时间">
-            <el-time-picker
-              v-model="newTask.endTime"
-              placeholder="选择结束时间"
-              format="HH:mm"
-              value-format="HH:mm"
-              :disabled="!newTask.startTime"
-              @change="val => (newTask.endTime = val)"
-            />
-          </el-form-item>
+
+          <template v-if="newTask.scheduleType === 'scheduled'">
+            <el-form-item label="开始时间">
+              <el-time-picker
+                v-model="newTask.startTime"
+                placeholder="选择开始时间"
+                format="HH:mm"
+                value-format="HH:mm"
+                @change="calculateEndTime"
+              />
+            </el-form-item>
+            <el-form-item label="结束时间">
+              <el-time-picker
+                v-model="newTask.endTime"
+                placeholder="选择结束时间"
+                format="HH:mm"
+                value-format="HH:mm"
+                :disabled="!newTask.startTime"
+                @change="val => (newTask.endTime = val)"
+              />
+            </el-form-item>
+          </template>
+          <template v-else>
+            <el-form-item label="所需时间">
+              <el-input-number v-model="newTask.duration" :min="0.5" :max="8" :step="0.5" />
+              <span class="ml-2">小时</span>
+            </el-form-item>
+          </template>
         </template>
 
         <template v-else>
-          <el-form-item label="日期范围">
-            <el-date-picker
-              v-model="newTask.dateRange"
-              type="daterange"
-              range-separator="至"
-              start-placeholder="开始日期"
-              end-placeholder="结束日期"
-              value-format="YYYY-MM-DD"
-              @change="handleDateRangeChange"
-            />
+          <el-form-item label="任务模式">
+            <el-radio-group v-model="newTask.scheduleType">
+              <el-radio label="scheduled">定时任务</el-radio>
+              <el-radio label="unscheduled">不定时任务</el-radio>
+            </el-radio-group>
           </el-form-item>
-          <el-form-item label="所需时间">
-            <el-input-number v-model="newTask.duration" :min="0.5" :max="8" :step="0.5" label="小时" />
-            <span class="ml-2">小时</span>
-          </el-form-item>
-        </template>
 
+          <template v-if="newTask.scheduleType === 'scheduled'">
+            <el-form-item label="日期范围">
+              <el-date-picker
+                v-model="newTask.dateRange"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期"
+                value-format="YYYY-MM-DD"
+                @change="handleDateRangeChange"
+              />
+            </el-form-item>
+          </template>
+          <template v-else>
+            <el-form-item label="所需时间">
+              <el-input-number v-model="newTask.duration" :min="0.5" :max="8" :step="0.5" />
+              <span class="ml-2">小时</span>
+            </el-form-item>
+          </template>
+        </template>
         <el-form-item label="优先级" v-if="isCustomTask">
           <el-select v-model="newTask.priority" placeholder="请选择优先级">
             <el-option v-for="item in priorityOptions" :key="item.value" :label="item.label" :value="item.value" />
