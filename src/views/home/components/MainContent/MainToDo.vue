@@ -163,6 +163,8 @@
       // 生成每日任务（补充完整字段）
       const startDate = new Date(newTask.value.dateRange[0])
       const endDate = new Date(newTask.value.dateRange[1])
+      const startDateStr = newTask.value.dateRange[0]
+      const endDateStr = newTask.value.dateRange[1]
       endDate.setHours(23, 59, 59)
 
       for (let day = new Date(startDate), index = 0; day <= endDate; day.setDate(day.getDate() + 1), index++) {
@@ -175,6 +177,8 @@
           priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
           date: new Date(day), // 创建新的Date实例
           taskType: 'long', // 明确任务类型
+          startDateRange: startDateStr, // 新增开始日期范围
+          endDateRange: endDateStr,
         }
 
         if (newTask.value.scheduleType === 'scheduled') {
@@ -226,35 +230,42 @@
       return true // 短时任务始终显示
     })
   })
-  const formatTime = (time, isShortTask = false, scheduleType = 'scheduled', duration = 0, date) => {
+  const formatTime = (
+    time,
+    isShortTask = false,
+    scheduleType = 'scheduled',
+    duration = 0,
+    date,
+    startDateRange,
+    endDateRange
+  ) => {
     // 长期任务处理
     if (!isShortTask) {
-      // 修复date参数类型
-      const safeDate = date instanceof Date ? date : new Date(date)
-
-      const dateStr =
-        safeDate?.toLocaleDateString('zh-CN', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-        }) || '无日期'
+      // 显示完整的日期范围
+      const startDate = new Date(startDateRange).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      const endDate = new Date(endDateRange).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      const dateRangeStr = `${startDate} - ${endDate}`
 
       if (scheduleType === 'scheduled') {
-        // 修复时间参数类型
-        const startTime = time instanceof Date ? time : new Date(time)
-        const endTime = date instanceof Date ? date : new Date(date)
-
-        const start = startTime.toLocaleTimeString('zh-CN', {
+        const start = new Date(time).toLocaleTimeString('zh-CN', {
           hour: '2-digit',
           minute: '2-digit',
         })
-        const end = endTime.toLocaleTimeString('zh-CN', {
+        const end = new Date(date).toLocaleTimeString('zh-CN', {
           hour: '2-digit',
           minute: '2-digit',
         })
-        return `${start} - ${end}\n${dateStr}`
+        return `${start} - ${end}\n${dateRangeStr}`
       }
-      return `${duration}小时\n${dateStr}`
+      return `${duration}小时\n${dateRangeStr}`
     }
     // 短时任务处理
     if (!time && scheduleType === 'unscheduled') {
@@ -334,8 +345,24 @@
                   <div style="white-space: pre-line; line-height: 1.4">
                     {{
                       element.scheduleType === 'scheduled'
-                        ? formatTime(element.startTime, false, 'scheduled', 0, element.date)
-                        : formatTime(null, false, 'unscheduled', element.duration, element.date)
+                        ? formatTime(
+                            element.startTime,
+                            false,
+                            'scheduled',
+                            0,
+                            element.date,
+                            element.startDateRange, // 传入开始日期范围
+                            element.endDateRange // 传入结束日期范围
+                          )
+                        : formatTime(
+                            null,
+                            false,
+                            'unscheduled',
+                            element.duration,
+                            element.date,
+                            element.startDateRange, // 传入开始日期范围
+                            element.endDateRange // 传入结束日期范围
+                          )
                     }}
                   </div>
                 </template>
