@@ -88,6 +88,20 @@
       newTask.value.dateRange = []
     }
   }
+  // 添加自动刷新逻辑
+  onMounted(() => {
+    // 每天0点刷新任务列表
+    const now = new Date()
+    const midnight = new Date(now)
+    midnight.setHours(24, 0, 0, 0)
+
+    const timeUntilMidnight = midnight - now
+    setTimeout(() => {
+      setInterval(() => {
+        tasks.value = [...tasks.value] // 触发响应式更新
+      }, 24 * 60 * 60 * 1000)
+    }, timeUntilMidnight)
+  })
   // 修改addTask方法
   const addTask = () => {
     if (!newTask.value.name) {
@@ -197,6 +211,21 @@
     console.log('任务顺序已更新', tasks.value)
   }
 
+  // 新增计算属性过滤任务
+  const filteredTasks = computed(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    return tasks.value.filter(task => {
+      if (task.taskType === 'long') {
+        const taskDate = new Date(task.date)
+        taskDate.setHours(0, 0, 0, 0)
+        // 严格匹配当天日期，忽略时间部分
+        return taskDate.getTime() === today.getTime()
+      }
+      return true // 短时任务始终显示
+    })
+  })
   const formatTime = (time, isShortTask = false, scheduleType = 'scheduled', duration = 0, date) => {
     // 长期任务处理
     if (!isShortTask) {
@@ -284,12 +313,18 @@
 
     <!-- 任务列表 -->
     <div class="task-list">
-      <div v-if="tasks.length === 0" class="empty-tasks" @click="openTaskModal()">
+      <div v-if="filteredTasks.length === 0" class="empty-tasks" @click="openTaskModal()">
         <el-icon><Plus /></el-icon>
         <span>添加任务</span>
       </div>
 
-      <draggable v-model="tasks" item-key="id" @end="onDragEnd" handle=".drag-handle">
+      <draggable
+        v-model="filteredTasks"
+        item-key="id"
+        @end="onDragEnd"
+        handle=".drag-handle"
+        :group="{ name: 'tasks' }"
+      >
         <template #item="{ element }">
           <div class="task-item" :class="`priority-${element.priority}`">
             <div class="task-info">
