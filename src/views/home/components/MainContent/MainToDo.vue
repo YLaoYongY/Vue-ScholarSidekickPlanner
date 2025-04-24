@@ -129,30 +129,61 @@
       })
     } else {
       // 长期任务处理
-      if (!newTask.value.startTime || !newTask.value.endTime) {
+      if (!newTask.value.dateRange || newTask.value.dateRange.length !== 2) {
         ElMessage.error('请选择完整日期范围')
         return
       }
 
-      const startDate = new Date(newTask.value.startTime)
-      const endDate = new Date(newTask.value.endTime)
-      endDate.setHours(23, 59, 59) // 包含结束日期的全天
-
-      // 生成每日任务
-      for (let day = new Date(startDate); day <= endDate; day.setDate(day.getDate() + 1)) {
-        const taskDate = new Date(day)
-        generatedTasks.push({
-          name: newTask.value.name,
-          startTime: new Date(taskDate.setHours(9, 0)), // 默认9点开始
-          endTime: new Date(taskDate.setHours(9 + (newTask.value.duration * 60) / 60, 0)),
-          priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
-        })
+      // 根据任务模式验证时间
+      if (newTask.value.scheduleType === 'scheduled') {
+        if (!newTask.value.startTime || !newTask.value.endTime) {
+          ElMessage.error('请填写每日时间范围')
+          return
+        }
+      } else {
+        if (!newTask.value.duration) {
+          ElMessage.error('请输入每日所需时间')
+          return
+        }
       }
 
-      const exists = tasks.value.some(t => t.name === newTask.value.name && t.startTime === generatedTasks[0].startTime)
-      if (exists) {
-        ElMessage.warning('相同任务已存在')
-        return
+      // 生成每日任务（补充完整字段）
+      const startDate = new Date(newTask.value.dateRange[0])
+      const endDate = new Date(newTask.value.dateRange[1])
+      endDate.setHours(23, 59, 59)
+
+      for (let day = new Date(startDate), index = 0; day <= endDate; day.setDate(day.getDate() + 1), index++) {
+        const taskDate = new Date(day)
+        let taskData = {
+          id: Date.now() + index,
+          name: newTask.value.name,
+          scheduleType: newTask.value.scheduleType,
+          duration: newTask.value.duration,
+          priority: isCustomTask.value ? newTask.value.priority : currentQuadrant.value,
+          date: new Date(day), // 创建新的Date实例
+          taskType: 'long', // 明确任务类型
+        }
+
+        if (newTask.value.scheduleType === 'scheduled') {
+          const [startHour, startMinute] = newTask.value.startTime.split(':').map(Number)
+          const [endHour, endMinute] = newTask.value.endTime.split(':').map(Number)
+
+          // 创建新的日期对象避免引用问题
+          const startDate = new Date(taskDate)
+          startDate.setHours(startHour, startMinute)
+
+          const endDate = new Date(taskDate)
+          endDate.setHours(endHour, endMinute)
+
+          taskData.startTime = startDate
+          taskData.endTime = endDate
+        } else {
+          const baseDate = new Date(taskDate)
+          baseDate.setHours(9, 0)
+          taskData.startTime = new Date(baseDate)
+          taskData.endTime = new Date(baseDate.getTime() + newTask.value.duration * 60 * 60 * 1000)
+        }
+        generatedTasks.push(taskData)
       }
     }
 
@@ -167,7 +198,31 @@
     console.log('任务顺序已更新', tasks.value)
   }
 
-  const formatTime = (time, isShortTask = false, scheduleType = 'scheduled', duration = 0) => {
+  const formatTime = (time, isShortTask = false, scheduleType = 'scheduled', duration = 0, date) => {
+    // 长期任务处理
+    if (!isShortTask) {
+      const dateStr =
+        date?.toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        }) || '无日期'
+
+      if (scheduleType === 'scheduled') {
+        const start = new Date(time).toLocaleTimeString('zh-CN', {
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+        const end = new Date(date).toLocaleTimeString('zh-CN', {
+          // 修复结束时间计算
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+        return `${start} - ${end}\n${dateStr}`
+      }
+      return `${duration}小时\n${dateStr}`
+    }
+    // 短时任务处理
     if (!time && scheduleType === 'unscheduled') {
       return `${duration}小时`
     }
@@ -184,16 +239,9 @@
         minute: '2-digit',
       })
     }
-
-    // 长期任务保持完整日期时间格式
-    return new Date(time).toLocaleString('zh-CN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
   }
+
+  // 原有短时任务处理保持不变...
 </script>
 <template>
   <div class="main-todo">
@@ -242,12 +290,23 @@
             <div class="task-info">
               <div class="task-name">{{ element.name }}</div>
               <div class="task-time">
-                <div v-if="element.scheduleType === 'scheduled'">
-                  {{ formatTime(element.startTime, true) }} - {{ formatTime(element.endTime, true) }}
-                </div>
-                <div v-else>
-                  {{ formatTime(null, true, 'unscheduled', element.duration) }}
-                </div>
+                <template v-if="element.taskType === 'long'">
+                  <div style="white-space: pre-line; line-height: 1.4">
+                    {{
+                      element.scheduleType === 'scheduled'
+                        ? formatTime(element.startTime, false, 'scheduled', 0, element.date)
+                        : formatTime(null, false, 'unscheduled', element.duration, element.date)
+                    }}
+                  </div>
+                </template>
+                <template v-else>
+                  <div v-if="element.scheduleType === 'scheduled'">
+                    {{ formatTime(element.startTime, true) }} - {{ formatTime(element.endTime, true) }}
+                  </div>
+                  <div v-else>
+                    {{ formatTime(null, true, 'unscheduled', element.duration) }}
+                  </div>
+                </template>
               </div>
             </div>
             <div class="drag-handle">
@@ -310,6 +369,20 @@
         </template>
 
         <template v-else>
+          <!-- 日期范围选择器始终显示 -->
+          <el-form-item label="日期范围">
+            <el-date-picker
+              v-model="newTask.dateRange"
+              type="daterange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"
+              value-format="YYYY-MM-DD"
+              @change="handleDateRangeChange"
+            />
+          </el-form-item>
+
+          <!-- 新增任务模式选择 -->
           <el-form-item label="任务模式">
             <el-radio-group v-model="newTask.scheduleType">
               <el-radio label="scheduled">定时任务</el-radio>
@@ -317,21 +390,28 @@
             </el-radio-group>
           </el-form-item>
 
+          <!-- 根据模式显示不同时间输入 -->
           <template v-if="newTask.scheduleType === 'scheduled'">
-            <el-form-item label="日期范围">
-              <el-date-picker
-                v-model="newTask.dateRange"
-                type="daterange"
-                range-separator="至"
-                start-placeholder="开始日期"
-                end-placeholder="结束日期"
-                value-format="YYYY-MM-DD"
-                @change="handleDateRangeChange"
+            <el-form-item label="每日开始时间">
+              <el-time-picker
+                v-model="newTask.startTime"
+                format="HH:mm"
+                value-format="HH:mm"
+                placeholder="选择开始时间"
+              />
+            </el-form-item>
+            <el-form-item label="每日结束时间">
+              <el-time-picker
+                v-model="newTask.endTime"
+                format="HH:mm"
+                value-format="HH:mm"
+                :disabled="!newTask.startTime"
+                placeholder="选择结束时间"
               />
             </el-form-item>
           </template>
           <template v-else>
-            <el-form-item label="所需时间">
+            <el-form-item label="每日所需时间">
               <el-input-number v-model="newTask.duration" :min="0.5" :max="8" :step="0.5" />
               <span class="ml-2">小时</span>
             </el-form-item>
@@ -353,6 +433,12 @@
 </template>
 
 <style scoped>
+  .task-time div {
+    white-space: pre-line;
+    line-height: 1.5;
+    text-align: right;
+    min-height: 40px; /* 保证有足够空间显示两行内容 */
+  }
   /* 模态框样式 */
   .el-date-editor.el-input {
     width: 100%;
