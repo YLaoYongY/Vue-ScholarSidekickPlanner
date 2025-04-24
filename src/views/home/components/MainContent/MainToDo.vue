@@ -81,12 +81,11 @@
   }
   // 添加日期范围变化处理
   const handleDateRangeChange = dates => {
+    // 仅处理日期部分，保留时间选择
     if (dates && dates.length === 2) {
-      newTask.value.startTime = dates[0] + ' 00:00:00'
-      newTask.value.endTime = dates[1] + ' 23:59:59'
+      newTask.value.dateRange = dates
     } else {
-      newTask.value.startTime = ''
-      newTask.value.endTime = ''
+      newTask.value.dateRange = []
     }
   }
   // 修改addTask方法
@@ -168,7 +167,7 @@
           const [startHour, startMinute] = newTask.value.startTime.split(':').map(Number)
           const [endHour, endMinute] = newTask.value.endTime.split(':').map(Number)
 
-          // 创建新的日期对象避免引用问题
+          // 创建新的日期对象并合并时间
           const startDate = new Date(taskDate)
           startDate.setHours(startHour, startMinute)
 
@@ -201,20 +200,26 @@
   const formatTime = (time, isShortTask = false, scheduleType = 'scheduled', duration = 0, date) => {
     // 长期任务处理
     if (!isShortTask) {
+      // 修复date参数类型
+      const safeDate = date instanceof Date ? date : new Date(date)
+
       const dateStr =
-        date?.toLocaleDateString('zh-CN', {
+        safeDate?.toLocaleDateString('zh-CN', {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit',
         }) || '无日期'
 
       if (scheduleType === 'scheduled') {
-        const start = new Date(time).toLocaleTimeString('zh-CN', {
+        // 修复时间参数类型
+        const startTime = time instanceof Date ? time : new Date(time)
+        const endTime = date instanceof Date ? date : new Date(date)
+
+        const start = startTime.toLocaleTimeString('zh-CN', {
           hour: '2-digit',
           minute: '2-digit',
         })
-        const end = new Date(date).toLocaleTimeString('zh-CN', {
-          // 修复结束时间计算
+        const end = endTime.toLocaleTimeString('zh-CN', {
           hour: '2-digit',
           minute: '2-digit',
         })
