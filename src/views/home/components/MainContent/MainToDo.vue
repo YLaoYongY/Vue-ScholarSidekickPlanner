@@ -153,6 +153,14 @@
           ElMessage.error('请填写每日时间范围')
           return
         }
+        // 新增时间顺序验证
+        const [startHour, startMinute] = newTask.value.startTime.split(':').map(Number)
+        const [endHour, endMinute] = newTask.value.endTime.split(':').map(Number)
+
+        if (endHour < startHour || (endHour === startHour && endMinute <= startMinute)) {
+          ElMessage.error('每日结束时间不能早于或等于开始时间')
+          return
+        }
       } else {
         if (!newTask.value.duration) {
           ElMessage.error('请输入每日所需时间')
