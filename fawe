@@ -1,0 +1,59 @@
+[33m330e1b7[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: reset: moving to origin/main
+[33ma2b3ff1[m HEAD@{1}: commit: 任务自动排序，任务栏拖动图表显示
+[33m2cbc0c9[m HEAD@{2}: commit: 长期任务定时任务结束时间必须大于开始时间
+[33ma7f1558[m HEAD@{3}: commit: 长期任务日期显示改成显示日期范围
+[33me811595[m HEAD@{4}: commit: 长期任务每天只显示当天的任务，不会显示不在该日期的其他日期任务
+[33me576df2[m HEAD@{5}: commit: 长期任务时间选择不受日期选择影响
+[33ma886590[m HEAD@{6}: commit: 长期任务创建正常，显示正常
+[33m8ad8b7a[m HEAD@{7}: reset: moving to 8ad8b7a
+[33m8ad8b7a[m HEAD@{8}: commit: 短时任务定时任务和不定时任务功能完成
+[33ma9f28b2[m HEAD@{9}: reset: moving to a9f28b2
+[33ma9f28b2[m HEAD@{10}: commit: 短时任务右侧时间显示优化
+[33mc171c90[m HEAD@{11}: reset: moving to c171c90
+[33mc171c90[m HEAD@{12}: reset: moving to c171c90
+[33mc171c90[m HEAD@{13}: commit: 长期任务添加完成
+[33m82715b1[m HEAD@{14}: commit: 添加短时任务功能完成
+[33m6ca1c55[m HEAD@{15}: reset: moving to 6ca1c55
+[33m6ca1c55[m HEAD@{16}: reset: moving to 6ca1c55
+[33m6ca1c55[m HEAD@{17}: commit: 任务溢出出现滚动条，查看溢出任务
+[33m56bc713[m HEAD@{18}: commit: 任务一次创建两个bug修复，任务拖拽样式调整
+[33m4e76a95[m HEAD@{19}: commit: 任务栏样式调整，可以创建任务
+[33m67124d5[m HEAD@{20}: commit: 主体内容连接pinia
+[33m6cdb655[m HEAD@{21}: reset: moving to 6cdb655
+[33m6cdb655[m HEAD@{22}: reset: moving to 6cdb655
+[33m6cdb655[m HEAD@{23}: commit: 首页主体内容组件化
+[33m73627cd[m HEAD@{24}: commit: 更改轮播图切换时间
+[33mf88bfce[m HEAD@{25}: commit: 右侧座右铭和图片同步，且不随图片数量限制显示
+[33m0b3d1b3[m HEAD@{26}: commit: 热力图数据填充
+[33m819e9f5[m HEAD@{27}: commit: 更改热力图颜色，获知热力图数据的更改位置
+[33ma187cee[m HEAD@{28}: commit: 右侧时间卡片计算逻辑完成
+[33m9d93f25[m HEAD@{29}: commit: 右侧侧边栏组件化完成
+[33m66b249d[m HEAD@{30}: reset: moving to 66b249d
+[33m66b249d[m HEAD@{31}: reset: moving to 66b249d
+[33m66b249d[m HEAD@{32}: reset: moving to 66b249d
+[33m66b249d[m HEAD@{33}: commit: 番茄钟样式，自习室样式和许愿墙
+[33mdfd7722[m HEAD@{34}: commit: 任务待办基础完成，样式待优化，细节待优化，任务添加更改顺序完成
+[33ma9820ee[m HEAD@{35}: reset: moving to a9820ee
+[33ma9820ee[m HEAD@{36}: commit: 右侧轮播图和座右铭完成
+[33m2ca341b[m HEAD@{37}: commit: 完成基础热力图样式和数据的渲染
+[33m6bfce33[m HEAD@{38}: commit: 右侧栏时间卡片样式基础完成
+[33m2a9e626[m HEAD@{39}: commit: 实现右侧第一个卡片定时翻转 翻转内容未填充
+[33maa174d7[m HEAD@{40}: commit: 首页进度条样式完成
+[33mb191f4d[m HEAD@{41}: commit: 数据卡片基础结构完成
+[33m58b81fb[m HEAD@{42}: commit: 完成侧边栏和主体内容的相应式布局
+[33mee1fa3a[m HEAD@{43}: commit: 改了侧边栏logo的字体颜色 和body html的高宽
+[33m0159dff[m HEAD@{44}: reset: moving to 0159dff
+[33m0159dff[m HEAD@{45}: reset: moving to 0159dff
+[33m0159dff[m HEAD@{46}: commit: 侧边导航栏完成
+[33m9712277[m HEAD@{47}: reset: moving to 9712277
+[33mcf41084[m HEAD@{48}: commit: 把二级页面的内容移到了home 但是有些bug
+[33mc55b049[m HEAD@{49}: reset: moving to c55b049
+[33m9712277[m HEAD@{50}: reset: moving to 9712277
+[33mc55b049[m HEAD@{51}: commit: 把仪表盘样式移植过来
+[33m9712277[m HEAD@{52}: commit: layout验证
+[33m26663ed[m HEAD@{53}: commit: 路由配置
+[33m0944966[m HEAD@{54}: commit: 请求工具
+[33m0bcb51c[m HEAD@{55}: commit: 仓库统一管理
+[33m3e09fc1[m HEAD@{56}: commit: elements-plus安装 pinia状态管理
+[33m6a572c9[m HEAD@{57}: commit: 项目目录调整
+[33m8386d08[m HEAD@{58}: commit (initial): 项目初始化
